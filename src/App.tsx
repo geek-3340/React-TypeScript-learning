@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import './App.css';
+import type { PokemonProps } from './interaces';
+
+const API_URL = 'https://pokeapi.co/api/v2/pokemon/';
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [pokemonId, setPokemonId] = useState('');
+    const [pokemonData, setPokemonData] = useState<PokemonProps | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    const handleFetchPokemon = async () => {
+        try {
+            const response = await fetch(API_URL + pokemonId);
+            const data = await response.json();
+            setPokemonData(data);
+            setError(null);
+            console.log(data);
+        } catch (err) {
+            setPokemonData(null);
+            setError('ポケモンの情報の取得に失敗しました。');
+            console.error('err:', err);
+        }
+    };
+
+    return (
+        <>
+            <div>
+                <h1>ポケモン図鑑</h1>
+                <input
+                    type="text"
+                    value={pokemonId}
+                    onChange={(e) => setPokemonId(e.target.value)}
+                />
+                <button type="button" onClick={handleFetchPokemon}>
+                    検索
+                </button>
+
+                {error && <p>{error}</p>}
+                {pokemonData && (
+                    <div>
+                        <h2>{pokemonData.name}</h2>
+                        <img
+                            src={pokemonData.sprites.front_default}
+                            alt={pokemonData.name}
+                        />
+                        <p>weight:{pokemonData.weight}</p>
+                        <p>height:{pokemonData.height}</p>
+                    </div>
+                )}
+            </div>
+        </>
+    );
 }
 
-export default App
+export default App;
